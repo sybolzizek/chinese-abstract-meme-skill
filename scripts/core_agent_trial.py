@@ -90,12 +90,13 @@ def _evidence_packet(tool_results: list[dict[str, Any]], request: str = "") -> d
             if not title and not snippet:
                 continue
             rank = str(raw.get("source_rank") or "general_web")
-            broken = snippet.count("�") >= 2 or snippet.count("鈥") >= 2 or len(snippet) < 24
+            claim_text = snippet or title
+            broken = claim_text.count("�") >= 2 or claim_text.count("鈥") >= 2 or len(claim_text) < 24
             if broken:
                 continue
             row = {
                 "title": title[:240],
-                "claim_text": snippet[:1200],
+                "claim_text": claim_text[:1200],
                 "url": str(raw.get("url") or "").strip(),
                 "host": raw.get("source_host") or "",
                 "source_rank": rank,
@@ -136,7 +137,7 @@ async def _rewrite_search_queries(llm: ChatLLM, request: str) -> list[str]:
         [
             {
                 "role": "system",
-                "content": "把用户请求改写成最多两个适合搜索引擎的关键词句。只输出 JSON 字符串数组，不回答问题，不添加请求中没有的人名、赛事、时间或事实。",
+                "content": "把用户请求改写成最多两个适合搜索引擎的关键词句；保留原语言的一条，必要时再给一条使用常见英文专名的查询。只输出 JSON 字符串数组，不回答问题，不添加请求中没有的人名、赛事、时间或事实。",
             },
             {"role": "user", "content": request},
         ],
