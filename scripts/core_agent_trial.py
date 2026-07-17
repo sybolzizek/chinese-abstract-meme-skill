@@ -297,6 +297,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     llm = ChatLLM(args.api_key, args.base_url, args.model)
     runtime = AgentRuntime(llm, plugin, max_tool_rounds=8)
     state = plugin.create_state()
+    skill_text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
     session = AgentSession(state=state)
     exact_surfaces = plugin.explicit_surfaces(args.request)
     exact_corpus_result: dict[str, Any] | None = None
@@ -371,6 +372,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             }
         claim_json = await ChatLLM(args.api_key, args.base_url, args.model).generate(
             [
+                {"role": "system", "content": "必须遵守的中文抽象/反串 skill：\n" + skill_text},
                 {
                     "role": "system",
                     "content": (
@@ -403,6 +405,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             mode_instruction += " 用户要的是串，不是资料汇总；保留一到四句，事实够用就停。"
         reviewed = await ChatLLM(args.api_key, args.base_url, args.model).generate(
             [
+                {"role": "system", "content": "必须遵守的中文抽象/反串 skill：\n" + skill_text},
                 {
                     "role": "system",
                     "content": (
@@ -430,6 +433,7 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
             )
         reviewed = await ChatLLM(args.api_key, args.base_url, args.model).generate(
             [
+                {"role": "system", "content": "必须遵守的中文抽象/反串 skill：\n" + skill_text},
                 {
                     "role": "system",
                     "content": (
