@@ -1,80 +1,42 @@
 ---
 name: chinese-abstract-meme
-description: Produce, revise, or judge Chinese internet satire, deadpan replies, abstract memes, and 反串. Use for Chinese comments, short meme copy, image-meme concepts, and evaluating whether a draft has forced AI-style meme language.
+description: 用中文互联网的抽象、反串和梗语料生成自然的短句、评论与回复。
 ---
 
-# Corpus
+# 抽象和反串
 
-The corpus is structured knowledge, not a prompt word bank. Read cards directly
-through its tools when they matter; do not flatten them into tags or compulsory
-catchphrases. The cards have required `term`, `explanation`, and `examples`;
-`derivations` and `sources` may be empty. The source field is not a quality
-gate.
+抽象不是固定句式，也不是把词语解释一遍。它来自熟悉的网络语料被放进不合适的场景：把小事说成大事，把严肃话按字面执行，把体面话推到失控，把一个具体细节突然接到另一套语境。
 
-When choosing a meme, start from the current scene and your own candidate
-surfaces. Use the corpus exact-read tools to check those candidates. The tools
-do not rank by similarity, calculate a score, or invent a relation; you decide
-whether the returned card actually fits. A card is material, not a mandatory
-catchphrase.
+反串不是表态。先顺着对方的话走半步，再用一个具体细节让前面的认真自己露馅。笑点停在错位出现的地方，不补总结，不解释“为什么好笑”。
 
-# Fresh facts
+短句优先。只抓当前场景里最具体的一个点，使用一次错位，然后停。不要把回复写成文章、点评、教程或新闻稿。
 
-For requests containing “最近”“当前”“这届”“今天”“本周”“正在流行” or an
-equivalent time-sensitive reference, search first. If the time anchor is
-unclear, call `time.now`; then call `web_search` with the concrete date or
-period. Read the returned material before making factual claims; if snippets do
-not establish the fact, use `web_fetch` on the relevant result. Do not answer
-from memory, silently substitute an older event, or write “我去搜一下” without
-actually calling the tool. If the material does not establish who/what/when,
-say that it was not verified instead of filling the gap with a plausible story.
+# 通用语料
 
-Keep facts and the later串法 separate in your own work: establish who/what/when
-from the search result, then write the requested tone. Do not turn a search
-snippet into a confident story, and do not add scores, brackets, quotes, or
-motives that the material never states.
+`典`、`绷`、`孝`、`急`、`唐`、`神人`、`闹麻了`是可直接使用的短反应，不是必须出现的口号。
 
-Do not show the search process to the user. After the tools return, either give
-the requested answer or say that the fact is still unverified; never end on
-“我再搜一下”“先看看” or a plan to search later.
+- `典`：对熟悉的老套路、标准答案、重复表演做反应。
+- `绷`：事情已经离谱到维持正常表情很困难。
+- `孝`：对过度维护、护主、自我感动式辩护做反应。
+- `急`：对方越解释越暴露在意，或主动把自己推入破防状态。
+- `唐`：行为、表达或逻辑低级到荒唐。
+- `神人`：对一个具体行为作短促的反向称呼，可褒可贬。
+- `闹麻了`：事情被演得过大，实际内容却很空或很小。
 
-For a current-event “串一下”, do not invent match scenes, scores, quotes,
-motives, or body-language that the material does not contain. If the facts are
-thin, make the uncertainty itself the joke. “串一下” normally wants the reply,
-not a researched article or a section titled “事件一/事件二”.
-When a requested串 has no verified detail, it may joke about the lack of
-material itself, but must not smuggle in a claim. When asked to挖掘事件 and the
-search only returns old or unreliable material, say so plainly instead of
-padding the list.
+这些词要落在具体对象或动作上。能不用就不用，不连续堆叠，不把它们当标签列表，不解释词义。
 
-Treat search results as leads, not proof. For scores, standings, dates and
-claims about a person, prefer an official record or a named reputable report;
-cross-check consequential details when possible. A title, snippet, SEO page or
-unknown mirror is not evidence by itself. If reliable material disagrees or is
-missing, leave that detail out rather than resolving it by guesswork.
+# 语料库
 
-# Reply
+语料卡包含 `term`、`explanation`、`examples`，也可能有 `derivations` 和 `sources`。先看场景，再形成少量候选，用 `corpus.lookup` 或 `corpus.open` 精确读取卡片。
 
-## Short surfaces
+卡片是可供改写的语料，不是要原样背诵的答案。优先借用卡片里的动作、语气、错位方式和例句结构；只有卡片真的贴合当前场景才使用。不要因为查到了卡片就硬塞，不要编造卡片没有的来源、关系或含义。
 
-The current short-surface set is: `典`、`绷`、`孝`、`急`、`唐`、`神人`、`闹麻了`。
+# Web
 
-These are live reaction surfaces, not definitions to recite. Use one only when
-the scene gives it a concrete target. Keep it short, let the surrounding detail
-carry the joke, and do not stack several of them in one reply. `神人` and
-`闹麻了` can close a line; `典`、`绷`、`孝`、`急`、`唐` work better as a turn or
-collision inside a line. Never explain why the word is funny.
+只要请求涉及最近、当前、这届、今天、本周、正在流行、最新或任何正在发生的事件，必须使用 Web。
 
-Answer in the form the user asks for. A request to “串一下” asks for the
-reply itself, not an explanation of the reply.
+先调用 `time.now` 确认时间，再调用 `web_search`。搜索摘要不能确认人物、时间、比分、阵容、动作、引语或事件经过时，必须对相关结果调用 `web_fetch`。至少要拿到足够、相互不矛盾的材料，才能写成事实。
 
-For a short reply, anchor it to one concrete detail from the prompt, then push
-one wrong premise or one mismatched register to its consequence. Use one move:
-literalize a metaphor, swap the evaluation standard, treat an abstract word as
-a physical object, or return to a small detail at the end. Stop at the first
-clean reversal. Avoid generic praise, “这说明/本质上/可以理解为”, moralizing,
-three-part summaries, and a paragraph explaining why the joke works.
+标题、摘要、SEO 页面、未知镜像和单个论坛帖只能当线索，不能单独当事实。材料不足、来源互相冲突或无法确认时，直接说无法核实，不得用记忆补齐，不得把搜索到的碎片缝成完整故事。
 
-For “串一下”, silently form a few candidate surfaces from the scene and use
-`corpus.lookup` to check exact cards when a candidate might fit. Do not dump the
-candidate list, force a returned card into the reply, or invent a relation just
-because two cards were returned. If none fits, write the line without a card.
+拿到事实后再写用户要的抽象或反串。事实只提供具体锚点，语气仍然要短、错位、像中文互联网的人话；不要把检索过程、来源列表和核查说明写进成品。
