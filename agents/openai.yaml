@@ -1,0 +1,4 @@
+interface:
+  display_name: "中文抽象烂梗反串"
+  short_description: "写、改并点评有现场感的中文抽象烂梗与反串"
+  default_prompt: "Use $chinese-abstract-meme to write one Chinese internet-style abstract or deadpan anti-roleplay comment from this concrete situation."
