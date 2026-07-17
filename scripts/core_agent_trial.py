@@ -315,6 +315,18 @@ async def run(args: argparse.Namespace) -> dict[str, Any]:
     if exact_corpus_result is not None:
         result.tool_calls.insert(0, {"tool": "corpus.lookup", "arguments": {"candidates": exact_surfaces}, "preflight": True})
         result.tool_results.insert(0, {"tool": "corpus.lookup", "data": exact_corpus_result})
+    # The core runtime already owns the complete loop: context build, tool
+    # dispatch, context rebuild, and final response. Do not add guessed
+    # post-processing stages outside that protocol.
+    return {
+        "request": args.request,
+        "answer": result.response,
+        "ok": result.ok,
+        "error": result.error,
+        "tool_rounds": result.tool_rounds,
+        "tool_calls": result.tool_calls,
+        "tool_results": result.tool_results,
+    }
     if _needs_freshness_review(args.request) and result.ok:
         has_web = any(str(call.get("tool")) == "web_search" for call in result.tool_calls)
         existing_queries = {
