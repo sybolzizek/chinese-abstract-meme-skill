@@ -41,6 +41,11 @@ CORPUS_TOOLS = {
         description="Open a small set of exact candidate surfaces the agent already has in mind. No ranking, similarity, or forced relation is applied.",
         arguments={"candidates": "A list of exact terms or variants to check."}, authority="abstract-corpus", side_effect="none", kind="mcp_read",
     ),
+    "corpus.discussion": ToolSpec(
+        name="corpus.discussion",
+        description="Read approved posts and replies attached to one exact corpus term. Use this for lived usage and image-meme context; it is not canonical meaning.",
+        arguments={"term": "Exact corpus term or known variant.", "limit": "1-20 discussion threads."}, authority="abstract-corpus", side_effect="none", kind="mcp_read",
+    ),
 }
 
 
@@ -156,7 +161,7 @@ async def _rewrite_search_queries(llm: ChatLLM, request: str) -> list[str]:
 class AbstractTrialPlugin(AssistantAgentPlugin):
     domain = "abstract_trial"
 
-    def __init__(self, graph: dict[str, Any]) -> None:
+    def __init__(self, graph: dict[str, Any], api_base: str = "http://127.0.0.1:8010") -> None:
         super().__init__(
             tools=CORPUS_TOOLS,
             system_prompt=(
@@ -172,6 +177,7 @@ class AbstractTrialPlugin(AssistantAgentPlugin):
             ),
         )
         self.graph = graph
+        self.api_base = api_base.rstrip("/")
         self.by_surface: dict[str, list[dict[str, Any]]] = {}
         self.by_id = {str(item.get("id")): item for item in graph.get("terms", [])}
         for item in graph.get("terms", []):
@@ -289,11 +295,31 @@ class AbstractTrialPlugin(AssistantAgentPlugin):
             },
         }
 
+    async def _exec_corpus_discussion(self, args: dict[str, Any], _state: Any) -> dict[str, Any]:
+        term = str(args.get("term") or "").strip()
+        matches = self.by_surface.get(term, [])
+        if not matches:
+            return {"ok": True, "data": {"term": term, "threads": [], "not_found": [term]}}
+        term_id = str(matches[0].get("id") or "")
+        try:
+            with urllib.request.urlopen(f"{self.api_base}/v1/community/terms/{term_id}/context?limit=20", timeout=15) as response:
+                threads = json.loads(response.read().decode("utf-8"))
+        except Exception as exc:
+            return {"ok": False, "error": f"discussion unavailable: {exc}"}
+        compact = []
+        for thread in threads if isinstance(threads, list) else []:
+            compact.append({
+                "body": thread.get("body", ""),
+                "image_url": thread.get("image_url", ""),
+                "replies": [{"body": item.get("body", ""), "kind": item.get("kind", "reply")} for item in (thread.get("replies") or [])],
+            })
+        return {"ok": True, "data": {"term": term, "term_id": term_id, "threads": compact, "not_found": []}}
+
 
 
 async def run(args: argparse.Namespace) -> dict[str, Any]:
     graph = fetch_graph(args.api_base)
-    plugin = AbstractTrialPlugin(graph)
+    plugin = AbstractTrialPlugin(graph, args.api_base)
     llm = ChatLLM(args.api_key, args.base_url, args.model)
     runtime = AgentRuntime(llm, plugin, max_tool_rounds=8)
     state = plugin.create_state()
