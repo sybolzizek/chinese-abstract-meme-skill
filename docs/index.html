@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="中文抽象梗 Skill：让 Agent 在具体语境里自然地玩梗，而不是背黑话表。" />
+    <title>中文抽象梗 Skill</title>
+    <style>
+      :root {
+        --ink: #181714;
+        --paper: #f2efe6;
+        --paper-deep: #e2decf;
+        --acid: #d8ff48;
+        --cyan: #81e7ef;
+        --pink: #f497bb;
+        --orange: #ff9c4a;
+        --line: rgba(24, 23, 20, .18);
+        font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      html { background: var(--paper); }
+      body { margin: 0; color: var(--ink); background: var(--paper); overflow-x: hidden; }
+      button, input { font: inherit; }
+      a { color: inherit; }
+      #field { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+      .grain { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .16; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.28'/%3E%3C/svg%3E"); mix-blend-mode: multiply; }
+      main { position: relative; z-index: 2; width: min(1160px, calc(100% - 40px)); margin: 0 auto; padding: 18px 0 72px; }
+      nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .brand { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 800; letter-spacing: -.07em; font-size: 18px; }
+      .brand-mark { display: grid; place-items: center; width: 43px; height: 43px; border: 2px solid var(--ink); border-radius: 11px 14px 11px 15px; background: var(--acid); box-shadow: 5px 5px 0 var(--pink); font-size: 24px; }
+      .nav-links { display: flex; align-items: center; gap: 8px; }
+      .nav-links a { border: 1.5px solid var(--ink); border-radius: 999px; padding: 9px 13px; text-decoration: none; font-size: 12px; background: rgba(242,239,230,.74); }
+      .nav-links a:hover { background: var(--cyan); }
+      .hero { min-height: calc(100vh - 140px); display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: clamp(32px, 7vw, 110px); padding: 70px 0 32px; }
+      .eyebrow, .terminal-label { font-size: 11px; letter-spacing: .14em; font-weight: 800; }
+      .eyebrow { display: inline-flex; gap: 9px; align-items: center; padding: 7px 9px; border: 1.5px solid var(--ink); background: var(--cyan); transform: rotate(-1.3deg); }
+      .eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); animation: blink 1.2s steps(2) infinite; }
+      h1 { max-width: 720px; font-family: ui-serif, Georgia, "Songti SC", serif; font-size: clamp(53px, 8.2vw, 112px); line-height: .9; letter-spacing: -.1em; margin: 21px 0 24px; }
+      h1 em { font-style: normal; display: inline-block; color: #f46395; text-shadow: 3px 3px 0 var(--ink); transform: rotate(2deg); }
+      .lede { max-width: 520px; font-size: 16px; line-height: 1.85; margin: 0; }
+      .action-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+      .button { cursor: pointer; border: 2px solid var(--ink); border-radius: 8px 12px 9px 10px; padding: 13px 16px; text-decoration: none; color: var(--ink); font-weight: 800; box-shadow: 4px 4px 0 var(--ink); background: var(--acid); }
+      .button:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--ink); }
+      .button.secondary { background: rgba(242,239,230,.86); }
+      .demo { position: relative; min-height: 480px; display: grid; align-content: center; }
+      .stack { position: relative; min-height: 390px; transform: rotate(1.4deg); }
+      .card { position: absolute; width: min(100%, 390px); border: 2px solid var(--ink); border-radius: 12px 15px 11px 16px; background: rgba(252,250,242,.93); box-shadow: 7px 7px 0 rgba(24,23,20,.75); padding: 17px; }
+      .prompt { top: 14px; left: 0; transform: rotate(-3deg); }
+      .prompt input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 15px; }
+      .prompt input::placeholder { color: rgba(24,23,20,.45); }
+      .cards { top: 104px; right: 0; height: 112px; background: var(--ink); color: var(--paper); overflow: hidden; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+      .chip { padding: 6px 8px; color: var(--ink); border-radius: 4px 8px 5px 6px; font-weight: 800; font-size: 13px; background: var(--acid); animation: pop .45s both; }
+      .chip:nth-child(2n) { background: var(--pink); animation-delay: .08s; }
+      .chip:nth-child(3n) { background: var(--cyan); animation-delay: .16s; }
+      .reply { top: 246px; left: 27px; background: #c7dac8; }
+      .reply p { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.7; margin: 12px 0 0; font-size: 14px; }
+      .cursor { display: inline-block; width: .7ch; height: 1em; vertical-align: -.15em; margin-left: 2px; background: var(--ink); animation: blink .8s steps(2) infinite; }
+      .pin { position: absolute; z-index: 2; display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid var(--ink); border-radius: 50% 48% 45% 52%; background: var(--orange); animation: float 3s ease-in-out infinite; }
+      .pin.one { top: 65px; right: -12px; } .pin.two { left: -19px; bottom: 61px; background: var(--cyan); animation-delay: -1.5s; }
+      .strip { border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); overflow: hidden; background: var(--ink); color: var(--acid); margin-inline: calc((min(1160px, calc(100vw - 40px)) - 100vw) / 2); }
+      .marquee { display: flex; width: max-content; gap: 40px; padding: 11px 0; white-space: nowrap; font-weight: 800; font-size: 12px; letter-spacing: .08em; animation: roll 24s linear infinite; }
+      .how { padding: 100px 0 40px; }
+      .how h2 { margin: 0 0 26px; font-family: ui-serif, Georgia, "Songti SC", serif; font-size: clamp(34px, 5vw, 58px); letter-spacing: -.08em; }
+      .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 13px; }
+      .step { min-height: 220px; padding: 18px; border: 1.5px solid var(--ink); border-radius: 14px 18px 15px 20px; background: rgba(252,250,242,.72); transition: transform .2s ease, background .2s ease; }
+      .step:hover { transform: translateY(-7px) rotate(-.5deg); background: var(--acid); }
+      .number { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 1.5px solid var(--ink); border-radius: 50%; font-weight: 800; background: var(--pink); }
+      .step h3 { margin: 35px 0 8px; font-size: 19px; } .step p { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 14px; line-height: 1.65; }
+      footer { display:flex; justify-content: space-between; gap: 20px; padding-top: 85px; font-size: 12px; color: rgba(24,23,20,.7); }
+      @keyframes blink { 50% { opacity: 0; } } @keyframes pop { from { opacity:0; transform: scale(.4) rotate(-8deg); } to { opacity:1; transform: none; } } @keyframes float { 50% { transform: translateY(-12px) rotate(9deg); } } @keyframes roll { to { transform: translateX(-50%); } }
+      @media (max-width: 760px) { main { width: min(100% - 28px, 620px); } .hero { grid-template-columns: 1fr; padding-top: 58px; } .demo { min-height: 395px; } .steps { grid-template-columns: 1fr; } .nav-links a:first-child { display:none; } footer { padding-top:50px; } }
+      @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; } }
+    </style>
+  </head>
+  <body>
+    <canvas id="field" aria-hidden="true"></canvas><div class="grain"></div>
+    <main>
+      <nav>
+        <a class="brand" href="https://github.com/sybolzizek/chinese-abstract-meme-skill"><span class="brand-mark">抽</span><span>中文抽象梗<br />SKILL</span></a>
+        <div class="nav-links"><a href="https://github.com/sybolzizek/chinese-abstract-meme-skill#readme">README</a><a href="https://github.com/sybolzizek/chinese-abstract-meme-skill">GitHub ↗</a></div>
+      </nav>
+      <section class="hero">
+        <div>
+          <span class="eyebrow"><i></i> CHINESE INTERNET / CORPUS</span>
+          <h1>哦真的牛批<br /><em>还有这种skill的的😅</em></h1>
+          <p class="lede">让你的ai能说抽象话</p>
+          <div class="action-row"><a class="button" href="https://github.com/sybolzizek/chinese-abstract-meme-skill/blob/main/SKILL.md"> SKILL.md ↗</a><a class="button secondary" href="https://github.com/sybolzizek/chinese-abstract-meme-skill">REPO ↗</a></div>
+        </div>
+        <div class="demo" aria-label="交互演示">
+          <div class="stack"><span class="pin one">?</span><span class="pin two">!</span>
+            <div class="card prompt"><div class="terminal-label">随便写点</div><input id="scene" value="牢大，我们今天串谁？" aria-label="输入内容" /></div>
+            <div class="card cards"><div class="terminal-label">词条</div><div class="chips" id="chips"><span class="chip">闹麻了</span><span class="chip">绷</span><span class="chip">唐</span><span class="chip">急</span></div></div>
+            <div class="card reply"><div class="terminal-label">回复</div><p id="reply">孩子们，这并不好笑<span class="cursor"></span></p></div>
+          </div>
+        </div>
+      </section>
+      <section class="strip"><div class="marquee"><span>😅</span><span>·</span><span>🤩</span><span>·</span><span>😝</span><span>·</span><span>🥵</span><span>·</span><span>🤡</span><span>·</span><span>😭</span><span>·</span><span>🤣</span><span>·</span><span>🤪</span><span>·</span></div></section>
+      <footer><span>中文抽象梗 Skill / still under construction</span><a href="https://github.com/sybolzizek/chinese-abstract-meme-skill/blob/main/LICENSE">MIT License</a></footer>
+    </main>
+    <script>
+      const field = document.querySelector('#field'), ctx = field.getContext('2d'); let dots=[];
+      function resize(){ field.width=innerWidth*devicePixelRatio; field.height=innerHeight*devicePixelRatio; ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); dots=Array.from({length:Math.min(150,Math.round(innerWidth/10))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*2+.4,v:Math.random()*.22+.05,c:['#f497bb','#81e7ef','#d8ff48','#ff9c4a'][Math.floor(Math.random()*4)]})); }
+      function draw(){ctx.clearRect(0,0,innerWidth,innerHeight); for(const d of dots){ d.y-=d.v; if(d.y<-8){d.y=innerHeight+8;d.x=Math.random()*innerWidth;} ctx.fillStyle=d.c;ctx.globalAlpha=.46;ctx.fillRect(d.x,d.y,d.r*1.4,d.r*1.4);}ctx.globalAlpha=1;requestAnimationFrame(draw)} resize(); draw(); addEventListener('resize',resize);
+      const samples=[
+        {chips:['闹麻了','绷','唐','急'],reply:'我去，给老资历跪了'},
+        {chips:['典','孝','神人','爬'],reply:'skill master 棍哥'},
+        {chips:['感觉不如原神','幽默','ccb','f8fq'],reply:'这是个好事啊'}
+      ]; let index=0; const scene=document.querySelector('#scene'), chips=document.querySelector('#chips'), reply=document.querySelector('#reply');
+      function rotate(){ index=(index+1)%samples.length; const item=samples[index]; chips.innerHTML=item.chips.map(x=>`<span class="chip">${x}</span>`).join(''); reply.innerHTML=`${item.reply}<span class="cursor"></span>`; }
+      scene.addEventListener('focus',()=>clearInterval(timer)); scene.addEventListener('blur',()=>timer=setInterval(rotate,4200)); let timer=setInterval(rotate,4200);
+    </script>
+  </body>
+</html>
