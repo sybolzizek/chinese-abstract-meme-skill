@@ -30,7 +30,26 @@
 git clone https://github.com/sybolzizek/chinese-abstract-meme-skill.git
 ```
 
-最小可用形态只需要 `SKILL.md`。如果你的 Agent 能连接本项目后续公开的语料服务，再配置对应地址即可；没有语料服务时，Skill 仍可独立工作，只是不会获得持续更新的词条材料。
+仓库附带的是一个确定版本的本地语料快照和 stdio MCP server；不需要 Club、数据库、账号或公网服务。
+
+```bash
+pip install -r requirements.txt
+```
+
+把下面这一段加入你的 Agent 的 MCP 配置。将路径换成 clone 后的绝对路径；支持 stdio MCP 的客户端都可用同一个 server。
+
+```json
+{
+  "mcpServers": {
+    "chinese-abstract-meme": {
+      "command": "python",
+      "args": ["/absolute/path/chinese-abstract-meme-skill/mcp_server.py"]
+    }
+  }
+}
+```
+
+然后把根目录 `SKILL.md` 安装到该客户端的 Skill 目录。完整效果依赖这两部分：Skill 决定何时、怎样取用语料；本地 MCP server 提供词条、例句、变体和关联。
 
 ## 使用方式
 
@@ -90,13 +109,26 @@ git clone https://github.com/sybolzizek/chinese-abstract-meme-skill.git
 
 1. 清洗已有语料，补全真实例句、变体和来源。
 2. 建立可持续更新的公开语料库与审核流程。
-3. 让更多 Agent 通过公开接口读取已确认语料，而不是复制一份僵死提示词。
+3. 定期导出新的公开快照，而不是让使用者依赖某个站点还活着。
+
+## 更新快照
+
+维护者在 Club 的 V2 API 可访问时运行：
+
+```bash
+python scripts/export_snapshot.py --api-base http://127.0.0.1:8010/v2
+```
+
+这会覆写 `data/corpus.json`。检查内容、提交快照后，所有使用者更新仓库并重启本地 MCP server 即可得到新版语料。
 
 ## 目录
 
 ```text
 SKILL.md       # Agent 实际读取的技能说明
-scripts/       # 当前 V2 语料库的只读检查脚本
+data/           # 已确认词条的版本化离线快照
+mcp_server.py   # 不依赖 Club 的本地 stdio MCP server
+local_corpus.py # 快照查询、词面检索与关联激活
+scripts/        # 快照导出与 V2 只读检查工具
 agents/        # 客户端展示元数据
 ```
 
