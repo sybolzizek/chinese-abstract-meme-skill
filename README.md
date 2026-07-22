@@ -97,7 +97,7 @@ git clone https://github.com/sybolzizek/chinese-abstract-meme-skill.git
 ```text
 SKILL.md       # Agent 实际读取的技能说明
 references/    # 调研、风格和评测材料
-scripts/       # 生成、测试与人工审核脚本
+scripts/       # 当前 V2 语料库的只读检查脚本
 agents/        # 客户端展示元数据
 ```
 
